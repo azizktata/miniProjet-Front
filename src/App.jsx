@@ -1,7 +1,5 @@
 import { useState, useReducer, useEffect, useCallback } from 'react'
-import { orderBy, sortBy } from "lodash";
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { orderBy } from "lodash";
 import axios from "axios";
 import './App.css'
 
@@ -50,7 +48,6 @@ function App() {
   const [tri1, setTri1]= useState(""); 
   const [inverse, setInverse]= useState("asc");
   const [count, setCount]= useState(1);
-  //&page=2
   const [pagecount, setPageCount]= useState(0);
   const [url, setUrl] = useState(`${API_ENDPOINT}${searchTerm}&page=${pagecount}`);
   const [urls, setUrls] = useState([]);
