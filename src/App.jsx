@@ -1,4 +1,5 @@
 import { useState, useReducer, useEffect, useCallback } from 'react'
+import { orderBy, sortBy } from "lodash";
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import axios from "axios";
@@ -46,8 +47,14 @@ function App() {
   const colors = ['#ebf0f0', '#d0fd8d', '#dd8dfd', '#87cefa'];
 
   const [searchTerm, setSearchTerm] = useState("d");//"all"
+  const [tri1, setTri1]= useState(""); 
+  const [inverse, setInverse]= useState("asc");
+  const [count, setCount]= useState(1);
+  //&page=2
+  const [pagecount, setPageCount]= useState(0);
+  const [url, setUrl] = useState(`${API_ENDPOINT}${searchTerm}&page=${pagecount}`);
+  const [urls, setUrls] = useState([]);
 
-  const [url, setUrl] = useState(`${API_ENDPOINT}${searchTerm}`);
   const [events, dispatchEvents] = useReducer(eventsReducer, {
     data: [],
     isLoading: false,
@@ -90,26 +97,91 @@ function App() {
   const handleSearchInput = (event) => {
     setSearchTerm(event.target.value);
   };
-
+  const handlePageForward = (event) => {
+    setPageCount(prevPageCount => prevPageCount + 1);
+    setUrl(`${API_ENDPOINT}${searchTerm}&page=${pagecount+1}`);
+  };
+  const handlePageBackward = (event) => {
+    if(pagecount > 0)
+      setPageCount(prevPageCount => prevPageCount - 1);
+    setUrl(`${API_ENDPOINT}${searchTerm}&page=${pagecount==0 ? pagecount : pagecount-1}`);
+  };
+  const handleSearchHistory = (url) => {
+    setUrl(`${url.url}${url.search}`);
+    event.preventDefault();
+   
+  };
   const handleSearchSubmit = (event) => {
     setUrl(`${API_ENDPOINT}${searchTerm}`);
     setColorIndex((prevIndex) => (prevIndex + 1) % colors.length);
+    if(!urls.some(url => url.search === searchTerm)){
+      setUrls(
+        current =>
+        [
+          ... current,
+          {
+            search:searchTerm,
+            url: API_ENDPOINT
+          }
+        ]
+        
+      )
+     }
 
     event.preventDefault();
     console.log(events.data)
   };
+  const hadnleTri1 = (value, Event) => {
+    // tri list
+    setTri1(value)
+    setCount(count+1)
+    if (count % 2 == 0) 
+      setInverse("asc")
+    else
+      setInverse("desc")
+    
+    console.log(inverse)
+    
+  }
+
+  const sortList  = orderBy(events.data, tri1, inverse)
 
   return (
     <div style={{ backgroundColor: colors[colorIndex] }} className="container"> 
     
       <h1 className="headlinePrimary">Available Events</h1>
-
+      <div className='tri'>
+        <h3>Tri:</h3>
+        <button className="button button_large" onClick={() => hadnleTri1("name")}>
+           by Name
+        </button>
+        <span></span>
+        <button className="button button_large" onClick={() => hadnleTri1("dates.start.localDate")}>
+           by Date
+        </button>
+      </div>
       <SearchForm
         searchTerm={searchTerm}
         onSearchInput={handleSearchInput}
         onSearchSubmit={handleSearchSubmit}
       />
+      <div className='history'>
+        <span>search_history:</span>
+     {urls && urls.map(url => (
+       
+        <button onClick={()=>handleSearchHistory(url)}>{url.search}</button>
      
+      ))}
+    </div>
+    <div className='page'>
+      <button className="button button_small" onClick={handlePageBackward}>
+           B
+      </button>
+      <button className="button button_small" onClick={handlePageForward}>
+           F
+      </button>
+    </div>
+      <hr />
       <hr />
 
       {events.isError && <p>Something went wrong ...</p>}
@@ -118,7 +190,7 @@ function App() {
         <p>Loading ...</p>
       ) : (
         <>
-        <List list={events.data}  onRemoveItem={handleRemoveEvent} />
+        <List list={tri1 ? sortList:events.data}  onRemoveItem={handleRemoveEvent} />
         </>
       )}
     </div>
@@ -128,7 +200,7 @@ function App() {
 
 const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
   <form className="search_form" onSubmit={onSearchSubmit}>
-    <label htmlFor="search">search: </label>
+    <label htmlFor="search">Search: </label>
      
       <input
         id="search"

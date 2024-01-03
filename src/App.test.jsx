@@ -3,7 +3,6 @@ import App, {
     Item,
     List,
     SearchForm,
-    InputWithLabel,
     } from "./App";
 import { describe, it, expect, vi } from "vitest";
 import {
@@ -18,7 +17,7 @@ vi.mock('axios');
 
 // Test Data
 const eventOne = {
-    title: 'D-A-D',
+    name: 'D-A-D',
     url: 'https://www.ticketmaster.com/not-another-dd-podcast-medford-massachuset',
     dates: {
         start:{
@@ -30,7 +29,7 @@ const eventOne = {
   
 };
 const eventTwo = {
-    title: 'Not Another D+D Podcast',
+    name: 'Not Another D+D Podcast',
     url: 'https://www.ticketmaster.dk/event/d-a-d-tickets/540577?language=en-us',
     dates: {
         start:{
@@ -129,17 +128,28 @@ describe('SearchForm', () => {
     });
 });
 
-describe('List', () => {
-    it('renders all events', () => {
-        render(<List list={events} />);
-        screen.debug();
+// testing removing event
+describe('App', () => {
+    it('removes a event', async () => {
+    const promise = Promise.resolve({
+        data: {
+            _embedded: events,
+        },
+    });
+    axios.get.mockImplementationOnce(() => promise);
+    render(<App />);
+    await waitFor(async () => await promise);
+    expect(screen.getAllByText('Remove').length).toBe(2);
+    expect(screen.getByText('D-A-D')).toBeInTheDocument();
+    fireEvent.click(screen.getAllByText('Remove')[0]);
+    expect(screen.getAllByText('Remove').length).toBe(1);
+    expect(screen.queryByText('D-A-D')).toBeNull();
     });
 });
-
-//Un test d'intégration pour le happy path.
+    //gration pour le happy path.
 describe('App', () => {
     it('succeeds fetching data', async () => {
-    axios.get.mockResolvedValueOnce({ data: { _embedded: events } });
+    axios.get.mockResolvedValueOnce({ data: { _embedded: [eventOne, eventTwo] } });
     render(<App />);
     expect(screen.queryByText(/Loading/)).toBeInTheDocument(); // we expect loading here
     await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(1));
@@ -163,88 +173,34 @@ it('fails fetching data', async () => {
     }
 });
 });
-//test if the props passed into Component has been rendered successfully or not
-//getByText / getByRole
 
-//expect(screen.queryByText(/Loading/)).toBeNull();
-//expect(screen.getByText('React')).toBeInTheDocument();
-
-// describe('Item', () => {
-//     it('renders all properties', () => {
-//         render(<Item item={storyOne}/>);
-//         screen.debug();
-//     });
-// });
-
-
-//Integration tests for axios with mock, stimulate axios requests
-//il teste comment les utilisateurs interagissent avec l’application et si elle fonctionne comme prévu
-
-//we are testing the component reaction with axios fetching the data, is the component acting as wanted or not?
-
-// result of axios is a promise
-
-
-
-
-// });
-
-// //Now we know the initial data fetching works for our App component,
-// //so we can move to testing user interactions. 
-
-// // testing removing a story
-// describe('App', () => {
-// it('removes a story', async () => {
-// const promise = Promise.resolve({
-//     data: {
-//     hits: stories,
-//     },
-// });
-// axios.get.mockImplementationOnce(() => promise);
-// render(<App />);
-// await waitFor(async () => await promise);
-// expect(screen.getAllByText('Dismiss').length).toBe(2);
-// expect(screen.getByText('Jordan Walke')).toBeInTheDocument();
-// fireEvent.click(screen.getAllByText('Dismiss')[0]);
-// expect(screen.getAllByText('Dismiss').length).toBe(1);
-// expect(screen.queryByText('Jordan Walke')).toBeNull();
-// });
-// });
 
 // //Testing searching feature
+describe('App' , () => {
+    it('searches for event', async () => {
+        const DPromise = Promise.resolve({
+            data: {
+                _embedded: [eventOne],
+            },
+        })
+   
+    const NPromise = Promise.resolve({
+        data: {
+            hits: [eventTwo],
+        },
+    })
+    axios.get.mockImplementation((url) =>{
+        if (url.includes('D')){
+            return DPromise;
+        }
+        if (url.includes('N')){
+            return NPromise;
+        }
+        throw Error();
+    })
+    });
 
-// describe('App' , () => {
-//     it('searches for a story', async () => {
-//         const reactPromise = Promise.resolve({
-//             data: {
-//                 hits: stories,
-//             },
-//         })
-//     const anotherStory = {
-//         title: 'Javascript',
-//         url: 'https://reactjs.org/',
-//         author: 'Bendan Eich',
-//         num_comments: 15,
-//         points: 10,
-//         objectID: 3,
-//     };
-//     const JavascriptPromise = Promise.resolve({
-//         data: {
-//             hits: [anotherStory],
-//         },
-//     })
-//     axios.get.mockImplementation((url) =>{
-//         if (url.includes('React')){
-//             return reactPromise;
-//         }
-//         if (url.includes('JavaScript')){
-//             return JavascriptPromise;
-//         }
-//         throw Error();
-//     })
-//     });
-
-// });
+});
 
 
 
