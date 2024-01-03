@@ -1,4 +1,4 @@
-import { useState, useReducer, useEffect, useCallback } from 'react'
+import React, { useState, useReducer, useEffect, useCallback } from 'react'
 import { orderBy } from "lodash";
 import axios from "axios";
 import './App.css'
@@ -44,13 +44,17 @@ function App() {
   const [colorIndex, setColorIndex] = useState(0);
   const colors = ['#ebf0f0', '#d0fd8d', '#dd8dfd', '#87cefa'];
 
-  const [searchTerm, setSearchTerm] = useState("d");//"all"
-  const [tri1, setTri1]= useState(""); 
-  const [inverse, setInverse]= useState("asc");
-  const [count, setCount]= useState(1);
-  const [pagecount, setPageCount]= useState(0);
+  const [searchTerm, setSearchTerm] = useState<string>("d");//"all"
+  const [tri1, setTri1]= useState<string>(""); 
+  const [inverse, setInverse]= useState<string>("asc");
+  const [count, setCount]= useState<number>(1);
+  const [pagecount, setPageCount]= useState<number>(0);
   const [url, setUrl] = useState(`${API_ENDPOINT}${searchTerm}&page=${pagecount}`);
-  const [urls, setUrls] = useState([]);
+  interface UrlItem {
+    search: string;
+    url: string;
+  }
+  const [urls, setUrls] = useState<UrlItem[]>([]);
 
   const [events, dispatchEvents] = useReducer(eventsReducer, {
     data: [],
@@ -94,41 +98,37 @@ function App() {
   const handleSearchInput = (event) => {
     setSearchTerm(event.target.value);
   };
-  const handlePageForward = (event) => {
+  const handlePageForward = () => {
     setPageCount(prevPageCount => prevPageCount + 1);
     setUrl(`${API_ENDPOINT}${searchTerm}&page=${pagecount+1}`);
   };
-  const handlePageBackward = (event) => {
+  const handlePageBackward = () => {
     if(pagecount > 0)
       setPageCount(prevPageCount => prevPageCount - 1);
     setUrl(`${API_ENDPOINT}${searchTerm}&page=${pagecount==0 ? pagecount : pagecount-1}`);
   };
   const handleSearchHistory = (url) => {
     setUrl(`${url.url}${url.search}`);
-    event.preventDefault();
+  
    
   };
-  const handleSearchSubmit = (event) => {
+  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     setUrl(`${API_ENDPOINT}${searchTerm}`);
     setColorIndex((prevIndex) => (prevIndex + 1) % colors.length);
-    if(!urls.some(url => url.search === searchTerm)){
-      setUrls(
-        current =>
-        [
-          ... current,
-          {
-            search:searchTerm,
-            url: API_ENDPOINT
-          }
-        ]
-        
-      )
-     }
+    if (!urls.some(url => url.search === searchTerm)) {
+      setUrls((current: Array<{ search: string; url: string }>) => [
+        ...current,
+        {
+          search: searchTerm,
+          url: API_ENDPOINT,
+        },
+      ]);
+    }
 
     event.preventDefault();
     console.log(events.data)
   };
-  const hadnleTri1 = (value, Event) => {
+  const hadnleTri1 = (value: string) => {
     // tri list
     setTri1(value)
     setCount(count+1)
@@ -137,12 +137,13 @@ function App() {
     else
       setInverse("desc")
     
-    console.log(inverse)
+  
     
   }
 
   const sortList  = orderBy(events.data, tri1, inverse)
-
+  
+      
   return (
     <div style={{ backgroundColor: colors[colorIndex] }} className="container"> 
     
@@ -195,7 +196,12 @@ function App() {
   
 }
 
-const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
+type SearchProps = {
+  searchTerm: string;
+  onSearchInput: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onSearchSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+};
+const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }:SearchProps) => (
   <form className="search_form" onSubmit={onSearchSubmit}>
     <label htmlFor="search">Search: </label>
      
@@ -212,14 +218,36 @@ const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
     </button>
   </form>
 );
-const List = ({ list, onRemoveItem }) => (
+
+type Events = EventType[];
+type ListProps = {
+  list: Events;
+  onRemoveItem: (item: EventType) => void;
+};
+const List = ({ list, onRemoveItem }: ListProps) => (
   <ul className='list'>
     {list.map((item) => (
       <Item item={item} onRemoveItem={onRemoveItem} />
     ))}
   </ul>
 );
-const Item = ({ item, onRemoveItem }) => (
+
+type EventType = {
+  name: string,
+  url: string,
+  dates: {
+    start:{
+        localDate: string,
+    },
+    timezone: string
+},
+locale: string,
+  };
+type ItemProps = {
+  item: EventType;
+  onRemoveItem: (item: EventType) => void;
+};
+const Item = ({ item, onRemoveItem }: ItemProps) => (
   <li className="item">
   
     <span style={{width:"40%"}}>
