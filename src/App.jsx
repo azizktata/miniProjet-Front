@@ -64,7 +64,7 @@ function App() {
     try {
       const result = await axios.get(url, {
         headers: {
-          "Access-Control-Allow-Origin": "*",
+         
           "Content-Type": "application/json",
         },
       });
