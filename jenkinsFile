@@ -15,7 +15,7 @@ pipeline {
         stage ("Generate backend image") {
             steps {
                  script{
-                    sh "mvn clean install -DskipTests"
+                    
                     sh "docker build -t aziz77/garage-front:1.0 ."
                 }
             }
