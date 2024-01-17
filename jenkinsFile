@@ -33,7 +33,7 @@ pipeline {
                 withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: 'k8s-cluster', contextName: '', credentialsId: 'SECRET_KEY', namespace: 'default', serverUrl: 'https://192.168.1.20:6443']]) {
                 sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'  
                 sh 'chmod u+x ./kubectl'  
-                sh './kubectl get nodes'
+                sh './kubectl delete deployment react-deployment'
                 sh './kubectl apply -f ./manifests/react-deployment.yml'
             }
             }
