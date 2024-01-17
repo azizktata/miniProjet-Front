@@ -66,7 +66,7 @@ const useStorageState = (key, initialState) => {
   return [value, setValue];
 };
 
-const API_ENDPOINT = "http://localhost:8081/api/v1/cars/brand/";
+const API_ENDPOINT = "http://10.101.165.63:8081/api/v1/cars/brand/";
 //"https://hn.algolia.com/api/v1/search?query="
 const App = () => {
   const [searchTerm, setSearchTerm] = useStorageState("all");//"all"search", "React""
