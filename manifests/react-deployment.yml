@@ -16,7 +16,7 @@ spec:
         - name: react-app
           image: aziz77/garage-front:1.0
           ports:
-            - containerPort: 3000
+            - containerPort: 5173
 
 ---
 apiVersion: v1
@@ -30,5 +30,5 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 3000
+      targetPort: 5173
       nodePort: 31001

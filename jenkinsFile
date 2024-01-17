@@ -12,22 +12,22 @@ pipeline {
            }
         }
 
-        stage ("Generate docker image") {
-            steps {
-                 script{
+        // stage ("Generate docker image") {
+        //     steps {
+        //          script{
                     
-                    sh "docker build -t aziz77/garage-front:1.0 ."
-                }
-            }
-        }
-        stage('Push to DockerHub') {
-            steps {
-                script {
-                    sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                    sh 'docker push aziz77/garage-front:1.0'
-                }
-            }
-        }
+        //             sh "docker build -t aziz77/garage-front:1.0 ."
+        //         }
+        //     }
+        // }
+        // stage('Push to DockerHub') {
+        //     steps {
+        //         script {
+        //             sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+        //             sh 'docker push aziz77/garage-front:1.0'
+        //         }
+        //     }
+        // }
         stage ("Deploy to k8s"){
             steps {
                 withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: 'k8s-cluster', contextName: '', credentialsId: 'SECRET_KEY', namespace: 'default', serverUrl: 'https://192.168.1.20:6443']]) {
